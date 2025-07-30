@@ -5,4 +5,9 @@
 <body>
     <h1>Phishing analyzer</h1>
     <h2>Big things will be created here soon...</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="email">
+        <input type="submit">
+    </form>
 </body>
