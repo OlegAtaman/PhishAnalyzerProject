@@ -19,3 +19,11 @@ def get_file_hash(file):
         sha256_hash.update(chunk)
 
     return sha256_hash.hexdigest()
+
+
+def get_string_hash(string):
+    encoded_string = string.encode('utf-8')
+    sha256_hash = sha256()
+    sha256_hash.update(encoded_string)
+
+    return sha256_hash.hexdigest()
