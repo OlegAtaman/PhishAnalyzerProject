@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<head>
+    <title>I'm back HELL YEAH</title>
+</head>
+<body>
+    <h1>Email analysis</h1>
+    {% if status == 'UP' %}
+    <h2>Status: pending...</h2>
+    <hr>
+    <h2>Analisys_id: {{ analisys_id }}</h2>
+    <h2>Hash sha-256: {{ hash }}</h2>
+    <h2>Risk score: <a style="color:grey">analyzing...</a></h2>
+    {% elif status == 'FN' %}
+    <h2>Status: analysis finished</h2>
+    <hr>
+    <h2>Analisys_id: {{ analisys_id }}</h2>
+    <h2>Hash sha-256: {{ hash }}</h2>  
+    {% if risk_score == 0 %}
+    <h2>Risk score: <a style="color:green">{{ risk_score }} | safe</a></h2>
+    {% elif risk_score < 5 %}
+    <h2>Risk score: <a style="color:yellow">{{ risk_score }} | suspicious</a></h2>
+    {% else %}
+    <h2>Risk score: <a style="color:red">{{ risk_score }} | dangerously</a></h2>
+    {% endif %}
+    {% endif %}
+    <hr>
+    <h2>Urls in email:</h2>
+        {% for link in urls %}
+            <h3>Hash sha-256: {{ link.hash_sha256 }}</h3>
+            {% if link.status != 'FN' %}
+            <h3>Risk score: <a style="color:grey">analyzing...</a></h3>
+            {% elif link.risk_score == 0 %}
+            <h3>Risk score: <a style="color:green">{{ link.risk_score }} | safe</a></h3>
+            {% elif link.risk_score < 5 %}
+            <h3>Risk score: <a style="color:yellow">{{ link.risk_score }} | suspicious</a></h3>
+            {% else %}
+            <h3>Risk score: <a style="color:red">{{ link.risk_score }} | dangerously</a></h3>
+            {% endif %}
+            <br>
+        {% endfor %}
+    <hr>
+    <h2>Attachments in email:</h2>
+        {% for attachment in attachments %}
+            <h3>Hash sha-256: {{ attachment.hash_sha256 }}</h3>
+            {% if attachment.status != 'FN' %}
+            <h3>Risk score: <a style="color:grey">analyzing...</a></h3>
+            {% elif attachment.risk_score == 0 %}
+            <h3>Risk score: <a style="color:green">{{ attachment.risk_score }} | safe</a></h3>
+            {% elif attachment.risk_score < 5 %}
+            <h3>Risk score: <a style="color:yellow">{{ attachment.risk_score }} | suspicious</a></h3>
+            {% else %}
+            <h3>Risk score: <a style="color:red">{{ attachment.risk_score }} | dangerously</a></h3>
+            {% endif %}
+            <br>
+        {% endfor %}
+</body>
+
+
+<!-- context = {
+        'analisys_id':analys_sid,
+        'status':email_obj.status,
+        'risk_score':email_obj.risk_score,
+        'hash':email_obj.hash_sha256,
+        'urls':Link.objects.filter(email=email_obj),
+        'attachments':Attachment.objects.filter(email=email_obj)
+    } -->

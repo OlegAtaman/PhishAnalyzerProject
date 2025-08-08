@@ -4,6 +4,7 @@ import time
 import tempfile
 
 from dotenv import load_dotenv
+from phishanalyzer.models import Link, Attachment
 
 
 load_dotenv()
@@ -15,18 +16,9 @@ def send_url_vt(link):
     client = vt.Client(api_key)
     analysis = client.scan_url(link)
 
-    while True:
-        analysis = client.get_object("/analyses/{}", analysis.id)
-        if analysis.status == "completed":
-            analysis_results = analysis.stats
-            break
-        time.sleep(10)
-
     client.close()
 
-    if analysis_results:
-        return analysis_results
-    return {}
+    return analysis.id
 
 def send_file_vt(file):
     client = vt.Client(api_key)
@@ -44,15 +36,34 @@ def send_file_vt(file):
 
     os.remove(tmp_path)
 
+    client.close()
+
+    return analysis.id
+
+def get_url_vt(analysis_id):
+    client = vt.Client(api_key)
+
     while True:
-        analysis = client.get_object("/analyses/{}", analysis.id)
+        analysis = client.get_object("/analyses/{}", analysis_id)
         if analysis.status == "completed":
             analysis_results = analysis.stats
             break
-        time.sleep(10)
+        time.sleep(5)
 
     client.close()
 
-    if analysis_results:
-        return analysis_results
-    return {}
+    return analysis_results
+
+def get_file_vt(analysis_id):
+    client = vt.Client(api_key)
+
+    while True:
+        analysis = client.get_object("/analyses/{}", analysis_id)
+        if analysis.status == "completed":
+            analysis_results = analysis.stats
+            break
+        time.sleep(5)
+
+    client.close()
+
+    return analysis_results

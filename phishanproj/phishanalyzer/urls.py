@@ -1,7 +1,8 @@
 from django.urls import path
 
-from phishanalyzer.views import mainpage
+from phishanalyzer.views import mainpage, detailpage
 
 urlpatterns = [
     path('', mainpage),
+    path('analysis/<analys_sid>', detailpage, name='detailedpage')
 ]

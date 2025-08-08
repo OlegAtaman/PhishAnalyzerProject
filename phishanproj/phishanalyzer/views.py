@@ -1,10 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 
 from phishanalyzer.utils import generate_string, get_file_hash
 from phishanalyzer.models import Email, Link, Attachment
 from phishanalyzer.email_parser import analyze_email
 from phishanalyzer.virustotal import send_url_vt, send_file_vt
+from phishanalyzer.tasks import analyze_email_vt
 
 
 def mainpage(request):
@@ -23,23 +24,20 @@ def mainpage(request):
 
             analyze_email(uploaded_file, new_email_obj)
 
-            got_urls = Link.objects.all().filter(email=new_email_obj)
-            got_attachments = Attachment.objects.all().filter(email=new_email_obj)
+            analyze_email_vt.delay(new_email_obj.id)
 
-            for link in got_urls:
-                res = send_url_vt(link.url)
-                risk_score = res.get('malicious') + res.get('suspicious')//2
-                link.status = 'FN'
-                link.risk_score = risk_score
-                link.save()
-
-            for attachment in got_attachments:
-                res = send_file_vt(attachment.file)
-                risk_score = res.get('malicious') + res.get('suspicious')//2
-                attachment.status = 'FN'
-                attachment.risk_score = risk_score
-                attachment.save()
-
-        return render(request, 'phishanalyzer/index.html')
+        return redirect('detailedpage', new_email_obj.analys_sid)
     
     return render(request, 'phishanalyzer/index.html')
+
+def detailpage(request, analys_sid):
+    email_obj = Email.objects.get(analys_sid=analys_sid)
+    context = {
+        'analisys_id':analys_sid,
+        'status':email_obj.status,
+        'risk_score':email_obj.risk_score,
+        'hash':email_obj.hash_sha256,
+        'urls':Link.objects.filter(email=email_obj),
+        'attachments':Attachment.objects.filter(email=email_obj)
+    }
+    return render(request, 'phishanalyzer/detailpage.html', context)
