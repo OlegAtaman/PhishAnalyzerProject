@@ -5,7 +5,7 @@ from phishanalyzer.utils import generate_string, get_file_hash
 from phishanalyzer.models import Email, Link, Attachment
 from phishanalyzer.email_parser import analyze_email
 from phishanalyzer.virustotal import send_url_vt, send_file_vt
-from phishanalyzer.tasks import analyze_email_vt
+from phishanalyzer.tasks import analyze_email_vt, checkmailbox
 
 
 def mainpage(request):
@@ -40,4 +40,5 @@ def detailpage(request, analys_sid):
         'urls':Link.objects.filter(email=email_obj),
         'attachments':Attachment.objects.filter(email=email_obj)
     }
+    # checkmailbox.delay()
     return render(request, 'phishanalyzer/detailpage.html', context)

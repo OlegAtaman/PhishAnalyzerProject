@@ -1,8 +1,19 @@
+import imaplib, os
+
+from dotenv import load_dotenv
 from celery import shared_task
 
 from phishanalyzer.models import Link, Attachment, Email
-from phishanalyzer.virustotal import send_url_vt, send_file_vt, get_url_vt, get_file_vt
+from phishanalyzer.virustotal import send_url_vt, send_file_vt, get_url_vt
+from phishanalyzer.utils import reply_to_email
+from phishanalyzer.email_parser import analyze_email
+from phishanalyzer.imap_parcer import scrap_mailbox
 
+
+load_dotenv()
+
+GMAIL_USERNAME = 'test.phish.analyzer@gmail.com'
+GMAIL_PASS = os.getenv('GOOGLEE_APP_PASSWORD')
 
 @shared_task
 def analyze_email_vt(email_obj_id):
@@ -45,3 +56,30 @@ def analyze_email_vt(email_obj_id):
     email_obj.status = 'FN'
     email_obj.risk_score = max_risk_score
     email_obj.save()
+
+
+@shared_task
+def checkmailbox():
+    mail = imaplib.IMAP4_SSL('imap.gmail.com')
+    mail.login(GMAIL_USERNAME, GMAIL_PASS)
+
+    folders = [
+        'inbox',
+        "[Gmail]/Spam"
+    ]
+
+    new_emails_to_analyze = {}
+
+    for f in folders:
+        new_emails_to_analyze.update(scrap_mailbox(f, mail))
+
+    for email_id in new_emails_to_analyze.keys():
+        email_obj = Email.objects.get(id=email_id)
+
+        analyze_email(email_obj.file, email_obj)
+        analyze_email_vt(email_id)
+
+        reply_to_email(new_emails_to_analyze.get(email_id), GMAIL_USERNAME, GMAIL_PASS, email_obj.id)
+
+
+    mail.close()
