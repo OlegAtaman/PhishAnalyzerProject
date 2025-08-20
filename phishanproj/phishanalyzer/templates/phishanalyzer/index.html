@@ -3,6 +3,10 @@
     <title>I'm back HELL YEAH</title>
 </head>
 <body>
+    <nav><a href="{% url 'login_user' %}">login</a>     <a href="{% url 'logout_user' %}">logout</a> <a href="{% url 'register_user' %}">register</a></nav>
+    {% if user.is_authenticated %}
+        <p>Welcome, {{ user.username }}. Thanks for logging in.</p>
+    {% endif %}
     <h1>Phishing analyzer</h1>
     <h2>Big things will be created here soon...</h2>
     <form method="post" enctype="multipart/form-data">

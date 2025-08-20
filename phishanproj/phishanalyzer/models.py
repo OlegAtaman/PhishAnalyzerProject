@@ -1,4 +1,5 @@
 from django.db import models
+from authapp.models import CustomUser
 
 
 DATA_STATUS_CHOICES = [
@@ -14,6 +15,7 @@ class Email(models.Model):
     file = models.FileField(upload_to='emails/')
     status = models.CharField(max_length=2, choices=DATA_STATUS_CHOICES, default='UP')
     risk_score = models.IntegerField(default=0)
+    author = models.ManyToManyField(CustomUser, related_name="up_emails")
 
     def __str__(self):
         return self.analys_sid

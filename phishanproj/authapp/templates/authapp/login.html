@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<head>
+    <title>I'm back HELL YEAH</title>
+</head>
+<body>
+    <h1>Login</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <p>Адреса електронної пошти:</p>
+        <input type="email" name="email">
+        <!-- <p>Ім'я користувача:</p>
+        <input type="text" name="username"> -->
+        <p>Пароль:</p>
+        <input type="password" name="password">
+        <input type="submit">
+    </form>
+</body>

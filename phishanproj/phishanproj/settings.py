@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'phishanalyzer',
+    'authapp',
 ]
 
 MIDDLEWARE = [
@@ -129,7 +130,6 @@ TEMPLATE_DIRS = (
     os.path.join(SETTINGS_PATH, 'templates'),
 )
 
-
 MEDIA_ROOT = 'media/'
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
@@ -138,3 +138,5 @@ CELERY_BROKER_URL = 'redis://localhost:6379/0'
 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+
+AUTH_USER_MODEL="authapp.CustomUser"
