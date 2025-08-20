@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<head>
-    <title>I'm back HELL YEAH</title>
-</head>
-<body>
-    <nav><a href="{% url 'login_user' %}">login</a>     <a href="{% url 'logout_user' %}">logout</a> <a href="{% url 'register_user' %}">register</a></nav>
+{% extends 'base.html' %}
+{% block 'title' %}
+<title>Analyze your email</title>
+{% endblock %}
+{% block 'content'%}
     {% if user.is_authenticated %}
         <p>Welcome, {{ user.username }}. Thanks for logging in.</p>
     {% endif %}
@@ -14,4 +13,4 @@
         <input type="file" name="email">
         <input type="submit">
     </form>
-</body>
+{% endblock %}

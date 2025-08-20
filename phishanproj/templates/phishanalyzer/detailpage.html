@@ -1,8 +1,8 @@
-<!DOCTYPE html>
-<head>
-    <title>I'm back HELL YEAH</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block 'title' %}
+<title>Email analysis result</title>
+{% endblock %}
+{% block 'content' %}
     <h1>Email analysis</h1>
     {% if status == 'UP' %}
     <h2>Status: pending...</h2>
@@ -53,14 +53,4 @@
             {% endif %}
             <br>
         {% endfor %}
-</body>
-
-
-<!-- context = {
-        'analisys_id':analys_sid,
-        'status':email_obj.status,
-        'risk_score':email_obj.risk_score,
-        'hash':email_obj.hash_sha256,
-        'urls':Link.objects.filter(email=email_obj),
-        'attachments':Attachment.objects.filter(email=email_obj)
-    } -->
+{% endblock %}
