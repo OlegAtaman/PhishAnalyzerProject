@@ -1,0 +1,356 @@
+@font-face {
+    font-family: "Crete Round";
+    src: url("/static/fonts/crete-round/CreteRound-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Crete Round";
+    src: url("/static/fonts/crete-round/CreteRound-Italic.ttf") format("truetype");
+    font-weight: normal;
+    font-style: italic;
+}
+
+body {
+    margin: 0;
+    font-family: "Crete Round", serif;
+    position: relative; 
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-color: black;
+    color: white;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url("/static/images/background.jpg") center/cover no-repeat;
+  filter: blur(8px) brightness(50%);
+  z-index: -1; 
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    height: 60px;
+    width: 100%;
+    font-size: 20px;
+    background-color: black;
+    color: white;
+}
+
+.navbar-option {
+    display: flex;
+    height: 30px;
+    margin-top: 0px;
+    margin-left: 20px;
+    /* background-color: green; */
+    align-items: center;
+    padding: 2px 3px;
+    color: white;
+    text-decoration: none;
+}
+
+.navbar-option:hover {
+    color: rgb(1, 177, 1)
+}
+
+.nav-right-con {
+    margin-left: auto;
+    display: inline-flex;
+    margin-right: 20px;
+}
+
+.index-body {
+    padding-top: 20px;
+    text-align: center;
+}
+
+.index-title {
+    font-size: 55px;
+}
+
+.index-hint {
+    font-size: 20px;
+    margin-bottom: 40px;
+}
+
+.index-star-hint {
+    font-size: 20px;
+    width: 25%;
+    margin: auto;
+    min-width: 300px;
+}
+
+.index-form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.index-input-field {
+    display: none;
+}
+
+.index-custom-file-upload {
+    margin-right: 10px;
+    justify-content: center;
+    display: flex;
+    color: black;
+    font-size: 35px;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 5px;
+    width: 200px;
+    height: 50px;
+    align-items: center;
+}
+
+.index-input-button {
+    padding: 0;
+    font-family: "Crete Round", serif;
+    margin-left: 10px;
+    justify-content: center;
+    display: flex;
+    color: black;
+    font-size: 35px;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 5px;
+    width: 202px;
+    height: 52px;
+    align-items: center;
+}
+
+.guide-paragraph {
+    margin: auto;
+    margin-bottom: 20px;
+    width: 25%;
+    min-width: 500px;
+    font-size: 20px;
+}
+
+.guide-title {
+    font-size: 40px;
+    margin-top: 15px;
+}
+
+.login-content {
+    text-align: center;
+    display: flexbox;
+    height: 80hv;
+}
+
+.login-cred-line {
+    font-size: 25px;
+}
+
+.login-form {
+    display: grid;
+    grid-template-columns: 150px 1fr; 
+    gap: 25px 20px;
+    align-items: center;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.login-form-up {
+  width: 550px;   /* зробить форму ширшою */
+  margin: 0 auto; /* щоб вона залишалася по центру */
+}
+
+.login-row {
+    display: contents;
+}
+
+.login-form label {
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+    text-align: right;
+}
+
+.login-form input[type="email"],
+.login-form input[type="password"],
+.login-form input[type="text"] {
+    padding: 10px;
+    font-size: 18px;
+    border-radius: 5px;
+    border: none;
+    width: 80%;
+    font-family: "Crete Round", serif;
+}
+
+.login-cred-line>input {
+    color: red;
+}
+
+.login-submit {
+    padding: 0;
+    font-family: "Crete Round", serif;
+    margin-left: 10px;
+    justify-content: center;
+    /* display: flex; */
+    color: black;
+    font-size: 35px;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 5px;
+    width: 202px;
+    height: 52px;
+    align-items: center;
+    margin: auto;
+    margin-top: 30px;
+}
+
+.login-wrapper {
+  margin: 0;
+  height: 60vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.register-hint {
+    font-size: 20px;
+    margin-bottom: 35px;
+}
+
+.register-form {
+    display: grid;
+    grid-template-columns: 250px 1fr; 
+    gap: 25px 20px;
+    align-items: center;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.register-content {
+  margin: 0;
+  height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.register-form input[type="email"],
+.register-form input[type="password"],
+.register-form input[type="text"] {
+    padding: 10px;
+    font-size: 18px;
+    border-radius: 5px;
+    border: none;
+    width: 90%;
+    font-family: "Crete Round", serif;
+}
+
+.register-form label {
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+    text-align: right;
+}
+
+.register-form-up {
+  width: 650px;
+  margin: 0 auto;
+}
+
+.detail-content-box {
+    text-align: center;
+    width: 50%;
+    min-width: 770px;
+    max-width: 900px;
+    margin: auto;
+}
+
+.detail-char-box {
+    text-align: left;
+    font-size: 20px;
+}
+
+.detail-char-box > p {
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.detail-link-box {
+    position: relative;
+    background-color: rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 30px;
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+.detail-link-box > p {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: 18px;
+}
+
+.detail-decoration {
+    left: 0px;
+    top: 0px;
+    position: absolute;
+    background-color: grey;
+    border-radius: 20px 0px 0px 20px;
+    height: 100%;
+    width: 20px
+}
+
+.detail-hint {
+    font-size: 20px;
+}
+
+.profile-content {
+    text-align: center;
+    width: 40%;
+    min-width: 470px;
+    max-width: 900px;
+    margin: auto;
+}
+
+.profile-emailblock {
+    font-size: 20px;
+    position: relative;
+    background-color: rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 30px;
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+.profile-emailblock > p {
+    margin: 10px;
+}
+
+.profile-decoration {
+    left: 0px;
+    top: 0px;
+    position: absolute;
+    background-color: grey;
+    border-radius: 20px 0px 0px 20px;
+    height: 100%;
+    width: 20px
+}
+
+.profile-historyblock > a {
+    border-radius: 20px;
+    display: block;
+    text-decoration: none;
+    color: white;
+}
+
+.profile-historyblock > a:hover {
+    background-color: rgba(255,255,255,0.2);
+}

@@ -1,11 +1,12 @@
+{% load static %}
 <!DOCTYPE html>
 <head>
+    <link rel="stylesheet" type="text/css" href="{% static 'styles/style.css'%}">
     {% block 'title' %}
         <title>I'm back HELL YEAH</title>
     {% endblock %}
 </head>
 <body>
-    <nav><a href="{% url 'login_user' %}">login</a>     <a href="{% url 'logout_user' %}">logout</a> <a href="{% url 'register_user' %}">register</a></nav>
     {% block 'content' %}
     {% endblock %}
 </body>

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block 'title' %}
+<title>User guide</title>
+{% endblock %}
+{% block 'content'%}
+<nav>
+    <a class="navbar-option" href="{% url 'mainpage' %}">Main page</a>
+    <a class="navbar-option" href="{% url 'searchpage' %}">Search</a>
+    <span class="nav-right-con">
+        {% if not request.user.is_authenticated %}
+        <a class="navbar-option" href="{% url 'login_user' %}">Log in</a>
+        <a class="navbar-option" href="{% url 'enter_email' %}">Register</a>
+        {% else %}
+        <a class="navbar-option" href="{% url 'logout_user' %}">Log out</a>
+        <a class="navbar-option" href="{% url 'profile_user' request.user.username %}">History</a>
+        {% endif %}
+    </span>
+</nav>
+<div class="index-body">
+    <h1 class="guide-title">User guide</h1>
+    <p class="guide-paragraph">Welcome to Phishing analyzer project. Our goal is to automate analysis of suspicious emails to protect your data from being leaked.</p>
+    <p class="guide-paragraph">> Take note that website does not provide unique analysis algorithms and all antivirus scans are completed trough Virustotal API.</p>
+    <p class="guide-paragraph">However  Phishing analyzer automates all scrapping of liks and attachments, sending it to VT and classification of results.</p>
+    <p class="guide-paragraph">There are 2 methods of checking email.</p>
+    <h1 class="guide-title">Scanning via UI</h1>
+    <p class="guide-paragraph">To scan email via GUI you need to:</p>
+    <p class="guide-paragraph">> Export your email to .eml format</p>
+    <p class="guide-paragraph">> Upload .eml file on the main page of Phishing analyzer</p>
+    <p class="guide-paragraph">> Wait for results</p>
+    <p class="guide-paragraph">IMPORTANT: files that are uploaded in unauthorized mode are available to anyone with respective url. Make sure not to leak any sensitive information or login to your account</p>
+    <h1 class="guide-title">Scanning via forwarding</h1>
+    <p class="guide-paragraph">To scan email via forwarding you need to:</p>
+    <p class="guide-paragraph">> Forward email to test.phish.analyzer@gmail.com</p>
+    <p class="guide-paragraph">> Ensure that subject contains one of (FW: ;  FWD: ; Analyze email)</p>
+    <p class="guide-paragraph">> Wait for results</p>
+    <p class="guide-paragraph">You will receive reply by mail. Also This way analysis will be available to you if you login on the website. If you not registered yet, analysis will be hidden till you register and will be available only to you if you register.</p>
+</div>
+{% endblock %}

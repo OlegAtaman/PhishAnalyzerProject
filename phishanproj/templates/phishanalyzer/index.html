@@ -3,14 +3,31 @@
 <title>Analyze your email</title>
 {% endblock %}
 {% block 'content'%}
-    {% if user.is_authenticated %}
-        <p>Welcome, {{ user.username }}. Thanks for logging in.</p>
-    {% endif %}
-    <h1>Phishing analyzer</h1>
-    <h2>Big things will be created here soon...</h2>
-    <form method="post" enctype="multipart/form-data">
+<nav>
+    <a class="navbar-option" href="{% url 'guidepage' %}">User guide</a>
+    <a class="navbar-option" href="{% url 'searchpage' %}">Search</a>
+    <span class="nav-right-con">
+        {% if not request.user.is_authenticated %}
+        <a class="navbar-option" href="{% url 'login_user' %}">Log in</a>
+        <a class="navbar-option" href="{% url 'enter_email' %}">Register</a>
+        {% else %}
+        <a class="navbar-option" href="{% url 'logout_user' %}">Log out</a>
+        <a class="navbar-option" href="{% url 'profile_user' request.user.username %}">History</a>
+        {% endif %}
+    </span>
+</nav>
+<div class="index-body">
+    <h1 class="index-title">Phishing analyzer</h1>
+    <p class="index-hint">Please upload your .eml file below*</p>
+    <form class="index-form" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <input type="file" name="email">
-        <input type="submit">
+        <label for="upload" class="index-custom-file-upload">
+        Select a file
+        </label>
+        <input id="upload" class="index-input-field" type="file" name="email">
+        <input class="index-input-button" type="submit" value="Submit">
     </form>
+    <p class="index-hint">...or just forward email to test.phish.analyzer@gmail.com</p>
+    <p class="index-star-hint">*Consider that analysis uploaded in unauthorized mode are available to anyone with respective url. Make sure not to leak any sensitive information or login to your account</p>
+</div>
 {% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block 'title' %}
+<title>Register your account</title>
+{% endblock %}
+{% block 'content' %}
+<nav>
+  <a class="navbar-option" href="{% url 'mainpage' %}">Main page</a>
+  <a class="navbar-option" href="{% url 'guidepage' %}">User guide</a>
+  <span class="nav-right-con">
+    {% if not request.user.is_authenticated %}
+        <a class="navbar-option" href="{% url 'login_user' %}">Log in</a>
+        <a class="navbar-option" href="{% url 'enter_email' %}">Register</a>
+        {% else %}
+        <a class="navbar-option" href="{% url 'logout_user' %}">Log out</a>
+        <a class="navbar-option" href="{% url 'profile_user' request.user.username %}">History</a>
+    {% endif %}
+  </span>
+</nav>
+<span class="login-wrapper"><div class="login-content">
+<h1 class="guide-title">Analysis search</h1>
+<form class="login-form-up" method="get" enctype="multipart/form-data">
+    <p class="register-hint">Please, enter analysis ID to get analysis result</p>
+    <div class="login-form">
+    <div class="login-row">
+      <label for="email">Analysis ID:</label>
+      <input type="text" name="sid">
+    </div>
+    </div>
+    <input class="login-submit" type="submit" value="Submit">
+</form>
+</div></span>
+{% endblock %}

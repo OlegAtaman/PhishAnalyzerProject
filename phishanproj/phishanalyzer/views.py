@@ -22,6 +22,8 @@ def mainpage(request):
             new_email_obj = Email(analys_sid=new_email_sid, hash_sha256=new_email_hash_sha256, file=new_email)
             new_email_obj.save()
 
+            new_email_obj.author.set([request.user])
+
             analyze_email(uploaded_file, new_email_obj)
 
             analyze_email_vt.delay(new_email_obj.id)
@@ -42,3 +44,12 @@ def detailpage(request, analys_sid):
     }
     # checkmailbox.delay()
     return render(request, 'phishanalyzer/detailpage.html', context)
+
+def guidepage(request):
+    return render(request, 'phishanalyzer/guide.html')
+
+def searchpage(request):
+    if request.GET.get('sid'):
+        return redirect('detailedpage', request.GET.get('sid'))
+
+    return render(request, 'phishanalyzer/search.html')

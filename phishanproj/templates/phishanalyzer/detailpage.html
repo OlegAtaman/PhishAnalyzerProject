@@ -3,54 +3,89 @@
 <title>Email analysis result</title>
 {% endblock %}
 {% block 'content' %}
-    <h1>Email analysis</h1>
+    <nav>
+        <a class="navbar-option" href="{% url 'mainpage' %}">Main page</a>
+        <a class="navbar-option" href="{% url 'searchpage' %}">Search</a>
+        <span class="nav-right-con">
+            {% if not request.user.is_authenticated %}
+            <a class="navbar-option" href="{% url 'login_user' %}">Log in</a>
+            <a class="navbar-option" href="{% url 'enter_email' %}">Register</a>
+            {% else %}
+            <a class="navbar-option" href="{% url 'logout_user' %}">Log out</a>
+            <a class="navbar-option" href="{% url 'profile_user' request.user.username %}">History</a>
+            {% endif %}
+        </span>
+    </nav>
+    <div class="detail-content-box">
+    <h1>Analysis result</h1>
     {% if status == 'UP' %}
-    <h2>Status: pending...</h2>
-    <hr>
-    <h2>Analisys_id: {{ analisys_id }}</h2>
-    <h2>Hash sha-256: {{ hash }}</h2>
-    <h2>Risk score: <a style="color:grey">analyzing...</a></h2>
+    <div class="detail-char-box">
+    <p>Status: pending...</p>
+    <p>Upload time: {{ analisys_id }}</p>
+    <p>Analisys id: {{ analisys_id }}</p>
+    <p>Hash sha-256: {{ hash }}</p>
+    <p>Risk score: <a style="color:grey">analyzing...</a></p>
+    </div>
     {% elif status == 'FN' %}
-    <h2>Status: analysis finished</h2>
-    <hr>
-    <h2>Analisys_id: {{ analisys_id }}</h2>
-    <h2>Hash sha-256: {{ hash }}</h2>  
+    <p>Status: analysis finished</p>
+    <p>Upload time: {{ analisys_id }}</p>
+    <p>Analisys_id: {{ analisys_id }}</p>
+    <p>Hash sha-256: {{ hash }}</p>  
     {% if risk_score == 0 %}
-    <h2>Risk score: <a style="color:green">{{ risk_score }} | safe</a></h2>
+    <p>Risk score: <a style="color:green">{{ risk_score }} | safe</a></p>
     {% elif risk_score < 5 %}
-    <h2>Risk score: <a style="color:yellow">{{ risk_score }} | suspicious</a></h2>
+    <p>Risk score: <a style="color:yellow">{{ risk_score }} | suspicious</a></p>
     {% else %}
-    <h2>Risk score: <a style="color:red">{{ risk_score }} | dangerously</a></h2>
+    <p>Risk score: <a style="color:red">{{ risk_score }} | dangerous</a></p>
     {% endif %}
     {% endif %}
-    <hr>
-    <h2>Urls in email:</h2>
+    <h2>Links in email:</h2>
+        {% if urls %}
         {% for link in urls %}
-            <h3>Hash sha-256: {{ link.hash_sha256 }}</h3>
+            <div class="detail-link-box">
+            <p>Hash sha-256: {{ link.hash_sha256 }}</p>
             {% if link.status != 'FN' %}
-            <h3>Risk score: <a style="color:grey">analyzing...</a></h3>
+            <p>Risk score: <a style="color:grey">analyzing...</a></p>
+            <div class="detail-decoration"></div>
             {% elif link.risk_score == 0 %}
-            <h3>Risk score: <a style="color:green">{{ link.risk_score }} | safe</a></h3>
+            <div class="detail-decoration" style="background-color: green"></div>
+            <p>Risk score: <a style="color:green">{{ link.risk_score }} | safe</a></p>
             {% elif link.risk_score < 5 %}
-            <h3>Risk score: <a style="color:yellow">{{ link.risk_score }} | suspicious</a></h3>
+            <div class="detail-decoration" style="background-color: yellow"></div>
+            <p>Risk score: <a style="color:yellow">{{ link.risk_score }} | suspicious</a></p>
             {% else %}
-            <h3>Risk score: <a style="color:red">{{ link.risk_score }} | dangerously</a></h3>
+            <div class="detail-decoration" style="background-color: red"></div>
+            <p>Risk score: <a style="color:red">{{ link.risk_score }} | dangerous</a></p>
             {% endif %}
-            <br>
+            </div>
         {% endfor %}
-    <hr>
+        {% else %}
+            <p class="detail-hint">There is no found links in this email.</p>
+        {% endif %}
     <h2>Attachments in email:</h2>
+        {% if attachments %}
         {% for attachment in attachments %}
-            <h3>Hash sha-256: {{ attachment.hash_sha256 }}</h3>
+        <div class="detail-link-box">
+            <div class="detail-decoration"></div>
+            <p>Hash sha-256: {{ attachment.hash_sha256 }}</p>
             {% if attachment.status != 'FN' %}
-            <h3>Risk score: <a style="color:grey">analyzing...</a></h3>
+            <p>Risk score: <a style="color:grey">analyzing...</a></p>
+            <div class="detail-decoration"></div>
             {% elif attachment.risk_score == 0 %}
-            <h3>Risk score: <a style="color:green">{{ attachment.risk_score }} | safe</a></h3>
+            <div class="detail-decoration" style="color: green"></div>
+            <p>Risk score: <a style="color:green">{{ attachment.risk_score }} | safe</a></p>
             {% elif attachment.risk_score < 5 %}
-            <h3>Risk score: <a style="color:yellow">{{ attachment.risk_score }} | suspicious</a></h3>
+            <div class="detail-decoration" style="color: yellow"></div>
+            <p>Risk score: <a style="color:yellow">{{ attachment.risk_score }} | suspicious</a></p>
             {% else %}
-            <h3>Risk score: <a style="color:red">{{ attachment.risk_score }} | dangerously</a></h3>
+            <div class="detail-decoration" style="color: red"></div>
+            <p>Risk score: <a style="color:red">{{ attachment.risk_score }} | dangerous</a></p>
             {% endif %}
             <br>
+        </div>
         {% endfor %}
+        {% else %}
+        <p class="detail-hint">There is no found attachments in this email.</p>
+        {% endif %}
+    </div>
 {% endblock %}

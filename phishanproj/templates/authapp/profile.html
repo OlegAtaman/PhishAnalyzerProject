@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block 'title' %}
+<title>Registration</title>
+{% endblock %}
+{% block 'content' %}
+<nav>
+  <a class="navbar-option" href="{% url 'mainpage' %}">Main page</a>
+  <span class="nav-right-con">
+    <a class="navbar-option" href="{% url 'login_user' %}">Log out</a>
+  </span>
+</nav>
+<div class="profile-content">
+<h2>Welcome back, {{ request.user.username }}</h2>
+<h1 class="guide-title">Your analysis history</h1>
+<div class='profile-historyblock'>
+{% for email in emails %}
+<a href="{% url 'detailedpage' email.analys_sid %}"><div class="profile-emailblock">
+{% if email.status == 'UP' %}
+<div class="profile-decoration"></div>
+{% elif email.risk_score == 0 %}
+<div class="profile-decoration" style="background-color: green;"></div>
+{% elif email.risk_score < 5 %}
+<div class="profile-decoration" style="background-color: yellow;"></div>
+{% else %}
+<div class="profile-decoration" style="background-color: red;"></div>
+{% endif %}
+<p>Time: {{ email.analys_sid }}</p>
+<p>Analysis id: {{ email.analys_sid }}</p>
+<p>Risk score: {{ email.risk_score }}</p>
+</div></a>
+{% endfor %}
+</div>
+</div>
+{% endblock %}

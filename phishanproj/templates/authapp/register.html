@@ -3,10 +3,33 @@
 <title>Registration</title>
 {% endblock %}
 {% block 'content' %}
-    <h1>Register</h1>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form }}
-        <input type="submit">
-    </form>
+<nav>
+  <a class="navbar-option" href="{% url 'mainpage' %}">Main page</a>
+  <span class="nav-right-con">
+    <a class="navbar-option" href="{% url 'login_user' %}">Log in</a>
+  </span>
+</nav>
+<span class="login-wrapper register-content"><div class="login-content">
+<h1 class="guide-title">Registration</h1>
+<form class="register-form-up" method="post" enctype="multipart/form-data">
+    <p class="register-hint">Please, finish registration in 5 minutes or your email will be unverified</p>
+    {% csrf_token %}
+    <div class="register-form">
+    <input type="hidden", name="email", value="{{ provided_email }}">
+    <div class="login-row">
+      <label for="email">Username:</label>
+      {{ form.username }}
+    </div>
+    <div class="login-row">
+      <label for="password">Password:</label>
+      {{ form.password1 }}
+    </div>
+    <div class="login-row">
+      <label for="password">Password confirmation:</label>
+      {{ form.password2 }}
+    </div>
+    </div>
+    <input class="login-submit" type="submit" value="Submit">
+</form>
+</div></span>
 {% endblock %}

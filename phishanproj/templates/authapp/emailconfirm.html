@@ -1,26 +1,23 @@
 {% extends 'base.html' %}
 {% block 'title' %}
-<title>Login to your account</title>
+<title>Register your account</title>
 {% endblock %}
 {% block 'content' %}
 <nav>
   <a class="navbar-option" href="{% url 'mainpage' %}">Main page</a>
   <span class="nav-right-con">
-    <a class="navbar-option" href="{% url 'enter_email' %}">Register</a>
+    <a class="navbar-option" href="{% url 'login_user' %}">Log in</a>
   </span>
 </nav>
 <span class="login-wrapper"><div class="login-content">
-<h1 class="guide-title">Log in</h1>
+<h1 class="guide-title">Registration</h1>
 <form class="login-form-up" method="post" enctype="multipart/form-data">
     {% csrf_token %}
+    <p class="register-hint">The code was sent to your email. Please, enter it below</p>
     <div class="login-form">
     <div class="login-row">
-      <label for="email">Email:</label>
-      <input id="email" type="email" name="email">
-    </div>
-    <div class="login-row">
-      <label for="password">Password:</label>
-      <input id="password" type="password" name="password">
+      <label for="email">Code:</label>
+      <input id="code" type="text" name="code">
     </div>
     </div>
     <input class="login-submit" type="submit" value="Submit">
