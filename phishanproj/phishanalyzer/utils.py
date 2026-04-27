@@ -80,17 +80,7 @@ def reply_to_email(original_email, my_email, my_password, analisys_id):
     msg["To"] = original_email["from"].replace("\n", "").replace("\r", "").strip()
     msg["In-Reply-To"] = original_email["message-id"].strip() if original_email.get("message-id") else None
     msg["References"] = original_email["message-id"].strip() if original_email.get("message-id") else None
-#     msg.set_content(
-#         f'''<html><body><h2>Thank you for your submission</h2>
-#         <h3>Email analysis result:</h3>
-#         <p>Analysis sid: {sid}</p>
-#         <p>Risk score: {hash_file}</p>
-#         <h3>Found links:</h3>
-#         {found_links}
-#         <h3>Found attachments:</h3>
-#         {found_attachments}</body></html>
-# '''
-#     )
+
 
     found_links_block = ''
     found_attachments_block = ''

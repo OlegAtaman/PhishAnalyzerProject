@@ -32,7 +32,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return self.email
     
 
-# class ConfirmationEmail(models.Model):
-#     email = models.EmailField(unique=True)
-#     is_verified = models.BooleanField(default=False)
-#     code = models.IntegerField()
+class ConfirmationEmail(models.Model):
+    email = models.EmailField(unique=True)
+    is_verified = models.BooleanField(default=False)
+    code = models.IntegerField()

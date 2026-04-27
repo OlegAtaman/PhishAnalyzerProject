@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block 'title' %}
 <title>Email analysis result</title>
 {% endblock %}
@@ -20,24 +21,25 @@
     <h1>Analysis result</h1>
     {% if status == 'UP' %}
     <div class="detail-char-box">
-    <p>Status: pending...</p>
-    <p>Upload time: {{ analisys_id }}</p>
+    <p id="status-bar">Status: pending...</p>
+    <p>Upload time: {{ uploaded_at }}</p>
     <p>Analisys id: {{ analisys_id }}</p>
     <p>Hash sha-256: {{ hash }}</p>
-    <p>Risk score: <a style="color:grey">analyzing...</a></p>
+    <p id="score-bar">Risk score: <a style="color:grey">analyzing...</a></p>
     </div>
     {% elif status == 'FN' %}
-    <p>Status: analysis finished</p>
+    <div class="detail-char-box">
+    <p id="status-bar">Status: analysis finished</p>
     <p>Upload time: {{ analisys_id }}</p>
     <p>Analisys_id: {{ analisys_id }}</p>
-    <p>Hash sha-256: {{ hash }}</p>  
+    <p>Hash sha-256: {{ hash }}</p>
     {% if risk_score == 0 %}
-    <p>Risk score: <a style="color:green">{{ risk_score }} | safe</a></p>
+    <p id="score-bar">Risk score: <a style="color:green">{{ risk_score }} | safe</a></p>
     {% elif risk_score < 5 %}
-    <p>Risk score: <a style="color:yellow">{{ risk_score }} | suspicious</a></p>
+    <p id="score-bar">Risk score: <a style="color:yellow">{{ risk_score }} | suspicious</a></p>
     {% else %}
-    <p>Risk score: <a style="color:red">{{ risk_score }} | dangerous</a></p>
-    {% endif %}
+    <p id="score-bar">Risk score: <a style="color:red">{{ risk_score }} | dangerous</a></p>
+    {% endif %}</div>
     {% endif %}
     <h2>Links in email:</h2>
         {% if urls %}
@@ -45,17 +47,19 @@
             <div class="detail-link-box">
             <p>Hash sha-256: {{ link.hash_sha256 }}</p>
             {% if link.status != 'FN' %}
-            <p>Risk score: <a style="color:grey">analyzing...</a></p>
-            <div class="detail-decoration"></div>
+            <div class="block-type-link" link-id="{{ link.id }}"><p>Risk score: <a style="color:grey">analyzing...</a></p>
+            <div class="detail-decoration"></div></div>
             {% elif link.risk_score == 0 %}
-            <div class="detail-decoration" style="background-color: green"></div>
-            <p>Risk score: <a style="color:green">{{ link.risk_score }} | safe</a></p>
+            <div class="block-type-link" link-id="{{ link.id }}"><div class="detail-decoration" style="background-color: green"></div>
+            <p>Risk score: <a style="color:green">{{ link.risk_score }} | safe</a></p></div>
             {% elif link.risk_score < 5 %}
+            <div class="block-type-link" link-id="{{ link.id }}">
             <div class="detail-decoration" style="background-color: yellow"></div>
-            <p>Risk score: <a style="color:yellow">{{ link.risk_score }} | suspicious</a></p>
+            <p>Risk score: <a style="color:yellow">{{ link.risk_score }} | suspicious</a></p></div>
             {% else %}
+            <div class="block-type-link" link-id="{{ link.id }}">
             <div class="detail-decoration" style="background-color: red"></div>
-            <p>Risk score: <a style="color:red">{{ link.risk_score }} | dangerous</a></p>
+            <p>Risk score: <a style="color:red">{{ link.risk_score }} | dangerous</a></p></div>
             {% endif %}
             </div>
         {% endfor %}
@@ -66,26 +70,33 @@
         {% if attachments %}
         {% for attachment in attachments %}
         <div class="detail-link-box">
-            <div class="detail-decoration"></div>
+            <!-- <div class="detail-decoration"></div> -->
             <p>Hash sha-256: {{ attachment.hash_sha256 }}</p>
             {% if attachment.status != 'FN' %}
+            <div class="block-type-attachment" attachment-id="{{ attachment.id }}">
             <p>Risk score: <a style="color:grey">analyzing...</a></p>
-            <div class="detail-decoration"></div>
+            <div class="detail-decoration"></div></div>
             {% elif attachment.risk_score == 0 %}
-            <div class="detail-decoration" style="color: green"></div>
-            <p>Risk score: <a style="color:green">{{ attachment.risk_score }} | safe</a></p>
+            <div class="block-type-attachment" attachment-id="{{ attachment.id }}">
+            <div class="detail-decoration" style="background-color:green"></div>
+            <p>Risk score: <a style="color:green">{{ attachment.risk_score }} | safe</a></p></div>
             {% elif attachment.risk_score < 5 %}
-            <div class="detail-decoration" style="color: yellow"></div>
-            <p>Risk score: <a style="color:yellow">{{ attachment.risk_score }} | suspicious</a></p>
+            <div class="block-type-attachment" attachment-id="{{ attachment.id }}">
+            <div class="detail-decoration" style="background-color:yellow"></div>
+            <p>Risk score: <a style="color:yellow">{{ attachment.risk_score }} | suspicious</a></p></div>
             {% else %}
-            <div class="detail-decoration" style="color: red"></div>
-            <p>Risk score: <a style="color:red">{{ attachment.risk_score }} | dangerous</a></p>
+            <div class="block-type-attachment" attachment-id="{{ attachment.id }}">
+            <div class="detail-decoration" style="background-color:red"></div>
+            <p>Risk score: <a style="color:red">{{ attachment.risk_score }} | dangerous</a></p></div>
             {% endif %}
-            <br>
         </div>
         {% endfor %}
         {% else %}
         <p class="detail-hint">There is no found attachments in this email.</p>
         {% endif %}
     </div>
+    <script>
+        const EMAIL_ID = "{{ analisys_id }}";
+    </script>
+    <script src="{% static 'scripts/logic/poller.js' %}"></script>
 {% endblock %}

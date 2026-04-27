@@ -23,8 +23,6 @@ def scrap_mailbox(boxname, mail_imap_obj):
 
     print(f"Непрочитаних листів: {len(email_ids)}")
 
-        
-
     for email_inst in email_ids:
         typ, data = mail_imap_obj.fetch(email_inst, '(RFC822)')
         for response_part in data:

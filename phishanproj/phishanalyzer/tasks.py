@@ -3,7 +3,7 @@ import imaplib, os
 from dotenv import load_dotenv
 from celery import shared_task
 
-from phishanalyzer.models import Link, Attachment, Email
+from phishanalyzer.models import Email
 from phishanalyzer.virustotal import send_url_vt, send_file_vt, get_url_vt
 from phishanalyzer.utils import reply_to_email
 from phishanalyzer.email_parser import analyze_email
@@ -16,47 +16,69 @@ GMAIL_USERNAME = 'test.phish.analyzer@gmail.com'
 GMAIL_PASS = os.getenv('GOOGLEE_APP_PASSWORD')
 
 @shared_task
-def analyze_email_vt(email_obj_id):
-    email_obj = Email.objects.get(id=email_obj_id)
+def analyze_email_vt(email_id):
+    email_obj = Email.objects.get(id=email_id)
 
-    urls = Link.objects.all().filter(email=email_obj)
-    attachments = Attachment.objects.all().filter(email=email_obj)
+    for link in email_obj.link_set.all():
+        link.analysis_id = send_url_vt(link.url)
+        link.status = 'AN'
+        link.save()
 
-    url_an_ids = {}
-    attachment_an_ids = {}
+    for att in email_obj.attachment_set.all():
+        att.analysis_id = send_file_vt(att.file)
+        att.status = 'AN'
+        att.save()
 
-    for url in urls:
-        url_an_ids.update({url.id:send_url_vt(url.url)})
+    poll_results.delay(email_id)
 
-    for attachment in attachments:
-        attachment_an_ids.update({attachment.id:send_file_vt(attachment.file)})
+@shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=10, max_retries=5)
+def poll_results(self, email_id):
+    email_obj = Email.objects.get(id=email_id)
+    all_done = True
 
-    max_risk_score = 0
+    for link in email_obj.link_set.all():
+        if link.status != 'FN':
+            results = get_url_vt(link.analysis_id)
 
-    for url_id, analysis in url_an_ids.items():
-        results = get_url_vt(analysis)
-        risk_score = results.get('malicious') + results.get('suspicious')//2
-        obj = Link.objects.get(id=url_id)
-        obj.status = 'FN'
-        obj.risk_score = risk_score
-        if risk_score > max_risk_score:
-            max_risk_score = risk_score
-        obj.save()
+            if not results:
+                all_done = False
+                continue
 
-    for attachment_id, analysis in attachment_an_ids.items():
-        results = get_url_vt(analysis)
-        risk_score = results.get('malicious') + results.get('suspicious')//2
-        obj = Attachment.objects.get(id=attachment_id)
-        obj.status = 'FN'
-        obj.risk_score = risk_score
-        if risk_score > max_risk_score:
-            max_risk_score = risk_score
-        obj.save()
+            link.risk_score = results.get('malicious') + results.get('suspicious')//2
+            link.status = 'FN'
+            link.save()
 
+    for att in email_obj.attachment_set.all():
+        if att.status != 'FN':
+            results = get_url_vt(att.analysis_id)
+
+            if not results:
+                all_done = False
+                continue
+
+            att.risk_score = results.get('malicious') + results.get('suspicious')//2
+            att.status = 'FN'
+            att.file.delete(save=False)
+            att.save()
+
+    if not all_done:
+        raise self.retry()
+    finalize_email.delay(email_id)
+
+@shared_task
+def finalize_email(email_id):
+    email_obj = Email.objects.get(id=email_id)
+
+    max_score = max(
+        [l.risk_score for l in email_obj.link_set.all()] +
+        [a.risk_score for a in email_obj.attachment_set.all()],
+        default=0
+    )
+
+    email_obj.risk_score = max_score
     email_obj.status = 'FN'
-    email_obj.risk_score = max_risk_score
+    email_obj.file.delete(save=False)
     email_obj.save()
-
 
 @shared_task
 def checkmailbox():

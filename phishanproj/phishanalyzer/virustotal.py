@@ -4,7 +4,6 @@ import time
 import tempfile
 
 from dotenv import load_dotenv
-from phishanalyzer.models import Link, Attachment
 
 
 load_dotenv()
@@ -29,7 +28,6 @@ def send_file_vt(file):
         
         temp_file.write(bytes)
         tmp_path = temp_file.name
-
 
     with open(tmp_path, 'rb') as f:
         analysis = client.scan_file(f)

@@ -4,7 +4,6 @@ from django.http import HttpResponse
 from phishanalyzer.utils import generate_string, get_file_hash
 from phishanalyzer.models import Email, Link, Attachment
 from phishanalyzer.email_parser import analyze_email
-from phishanalyzer.virustotal import send_url_vt, send_file_vt
 from phishanalyzer.tasks import analyze_email_vt, checkmailbox
 
 
@@ -19,10 +18,11 @@ def mainpage(request):
             new_email_sid = generate_string(30)
             new_email_hash_sha256 = get_file_hash(new_email)
 
-            new_email_obj = Email(analys_sid=new_email_sid, hash_sha256=new_email_hash_sha256, file=new_email)
+            new_email_obj = Email(analys_sid=new_email_sid, hash_sha256=new_email_hash_sha256)
             new_email_obj.save()
 
-            new_email_obj.author.set([request.user])
+            if request.user.is_authenticated:
+                new_email_obj.author.set([request.user])
 
             analyze_email(uploaded_file, new_email_obj)
 
@@ -37,6 +37,7 @@ def detailpage(request, analys_sid):
     context = {
         'analisys_id':analys_sid,
         'status':email_obj.status,
+        'uploaded_at':email_obj.uploaded_at,
         'risk_score':email_obj.risk_score,
         'hash':email_obj.hash_sha256,
         'urls':Link.objects.filter(email=email_obj),
