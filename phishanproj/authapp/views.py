@@ -10,22 +10,30 @@ from authapp.forms import CustomUserCreationForm
 from authapp.models import CustomUser, ConfirmationEmail
 from authapp.utils import generate_code
 from authapp.postmanager import send_code
+from authapp.security_check import count_login_attempt, set_zero_attempts, try_code
+from phishanalyzer.tasks import delete_confirmation
 
 
 def login_user(request):
-    print(request.user)
     user = None
     if request.method == 'POST':
         email=request.POST['email']
         password=request.POST['password']
-        user=authenticate(request, email=email, password=password)
+        result, exp = count_login_attempt(email)
+        if result == True:
+            user=authenticate(request, email=email, password=password)
+        else:
+            messages.error(request, exp)
+            return redirect('login_user')
     
-    if user is not None:
-        login(request, user)
-        return redirect('mainpage')
-    else:
-        pass
-
+        if user is not None:
+            login(request, user)
+            set_zero_attempts(email)
+            return redirect('mainpage')
+        else:
+            messages.error(request, "! Incorrect credentials")
+            return redirect('login_user')
+    
     return render(request, 'authapp/login.html')
 
 def logout_user(request):
@@ -34,24 +42,32 @@ def logout_user(request):
     return redirect('mainpage')
 
 def register_user(request):
-    print(request.user)
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
 
         email = request.GET.get('email')
-        email_obj = CustomUser.objects.filter(email=email)
-        if email_obj:
-            return HttpResponse('The email has been taken')
+        old_user = CustomUser.objects.filter(email=email)
+        if old_user:
+            messages.error(request, '! This email has been taken')
+            return redirect(reverse('register_user') + '?email=' + email)
         
         if form.is_valid():
             form.save()
             if not email:
-                return HttpResponse('No email provided')
+                messages.error(request, '! No email provided')
+                return redirect(reverse('register_user') + '?email=' + email)
 
             password = form.cleaned_data['password1']
             user=authenticate(request, email=email, password=password)
             login(request, user)
-        
+        else:
+            messages.error(request, "! Please, fix errors below")
+            return render(request, 'authapp/register.html', {
+                    'form': form,
+                    'provided_email': email
+                })
+
+
         return redirect('mainpage')
 
     provided_email = request.GET.get('email')
@@ -61,22 +77,30 @@ def register_user(request):
 def enter_email(request):
     if request.method == 'POST':
         try:
-            mail_to_confirm = ConfirmationEmail(email=request.POST.get('email'), code=generate_code())
+            random_code = generate_code()
+            mail_to_confirm = ConfirmationEmail(email=request.POST.get('email'), code=random_code)
             mail_to_confirm.save()
-        except:
-            return HttpResponse('This email has been taken')
+            delete_confirmation.apply_async(args=[mail_to_confirm.id], countdown=15 * 60)
+        except Exception as exc:
+            messages.error(request, "! This email is already taken")
+            return redirect('enter_email')
         url = reverse('confirm_email')
-        completed_url = url + '?email=' + request.POST['email']
+        mini_url = url + '?email=' + request.POST['email']
         send_code(mail_to_confirm.email,
                   mail_to_confirm.code,
-                  'test.phish.analyzer@gmail.com',
+                  'phishanalyzer.dev@gmail.com',
                   os.getenv('GOOGLEE_APP_PASSWORD'),
-                  completed_url)
-        return redirect(completed_url)
+                  mini_url)
+        return redirect(mini_url)
     return render(request, 'authapp/emailsend.html')
 
 def confirm_email(request):
+    ctx = {}
     email = request.GET.get('email')
+    code = request.GET.get('code')
+    # if code:
+    #     ctx.update({'code':code})
+
     if not email:
         return HttpResponse('Access denied')
 
@@ -86,18 +110,24 @@ def confirm_email(request):
             return HttpResponse('Email was not provided')
         email_obj = email_obj[0]
 
-        sub_code = int(request.POST.get('code'))
-        real_code = email_obj.code
+        try:
+            sub_code = int(request.POST.get('code'))
+        except:
+            messages.error(request, '! Invalid format')
+            return redirect(f"{reverse('confirm_email')}?email={email}")
 
-        if sub_code == real_code:
+        result, message = try_code(sub_code, email_obj)
+
+        if result == True:
             email_obj.is_verified = True
             email_obj.save()
             url = reverse('register_user')
             return redirect(url + '?email=' + email)
         else:
-            return redirect('enter_email')
+            messages.error(request, message)
+            return redirect(f"{reverse('confirm_email')}?email={email}")
 
-    return render(request, 'authapp/emailconfirm.html')
+    return render(request, 'authapp/emailconfirm.html', ctx)
 
 def profile_user(request, name):
     if not request.user.is_authenticated:

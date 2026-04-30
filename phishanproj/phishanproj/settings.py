@@ -13,6 +13,10 @@ from celery.schedules import crontab
 from pathlib import Path
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -31,14 +35,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'phishanalyzer',
+    'authapp',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'phishanalyzer',
-    'authapp',
 ]
 
 MIDDLEWARE = [
@@ -136,6 +140,13 @@ TEMPLATE_DIRS = (
 
 MEDIA_ROOT = 'media/'
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+    }
+}
+
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 
 # CELERY_BROKER_URL = os.environ.get('REDIS_URL')  # для Heroku
@@ -144,3 +155,13 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 
 AUTH_USER_MODEL="authapp.CustomUser"
+
+DEFAULT_FROM_EMAIL = 'phishanalyzer.dev@gmail.com'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+
+EMAIL_HOST_USER = 'phishanalyzer.dev@gmail.com'
+EMAIL_HOST_PASSWORD = os.getenv('GOOGLEE_APP_PASSWORD')

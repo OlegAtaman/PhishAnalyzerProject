@@ -12,9 +12,9 @@
 <span class="login-wrapper register-content"><div class="login-content">
 <h1 class="guide-title">Registration</h1>
 <form class="register-form-up" method="post" enctype="multipart/form-data">
-    <p class="register-hint">Please, finish registration in 5 minutes or your email will be unverified</p>
+    <p class="register-hint">Please, finish registration in 15 minutes or your email will be unverified</p>
     {% csrf_token %}
-    <div class="register-form">
+    <div class="register-form" style="margin-bottom: 20px;">
     <input type="hidden", name="email", value="{{ provided_email }}">
     <div class="login-row">
       <label for="email">Username:</label>
@@ -29,6 +29,22 @@
       {{ form.password2 }}
     </div>
     </div>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="message {{ message.tags }}" style="margin-bottom: 5px;">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+    {% if form.errors %}
+    <div style="color:red;">
+        {% for field in form %}
+            {% for error in field.errors %}
+                <p>{{ field.label }}: {{ error }}</p>
+            {% endfor %}
+        {% endfor %}
+    </div>
+    {% endif %}
     <input class="login-submit" type="submit" value="Submit">
 </form>
 </div></span>

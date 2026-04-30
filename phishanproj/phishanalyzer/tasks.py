@@ -8,11 +8,12 @@ from phishanalyzer.virustotal import send_url_vt, send_file_vt, get_url_vt
 from phishanalyzer.utils import reply_to_email
 from phishanalyzer.email_parser import analyze_email
 from phishanalyzer.imap_parcer import scrap_mailbox
+from authapp.models import ConfirmationEmail
 
 
 load_dotenv()
 
-GMAIL_USERNAME = 'test.phish.analyzer@gmail.com'
+GMAIL_USERNAME = 'phishanalyzer.dev@gmail.com'
 GMAIL_PASS = os.getenv('GOOGLEE_APP_PASSWORD')
 
 @shared_task
@@ -105,3 +106,7 @@ def checkmailbox():
 
 
     mail.close()
+
+@shared_task
+def delete_confirmation(obj_id):
+    ConfirmationEmail.objects.filter(id=obj_id).delete()

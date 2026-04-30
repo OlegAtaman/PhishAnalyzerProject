@@ -20,6 +20,13 @@
       <input id="email" type="email" name="email">
     </div>
     </div>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="message {{ message.tags }}" style="margin-bottom: 5px;">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
     <input class="login-submit" type="submit" value="Submit">
 </form>
 </div></span>

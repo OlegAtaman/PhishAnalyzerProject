@@ -23,6 +23,14 @@
       <input id="password" type="password" name="password">
     </div>
     </div>
+    <p class="register-hint" style="margin-top:0px;margin-bottom:0px">Forgot your password? <a href="{% url 'password_reset' %}">Password recovery</a>.</p>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="message {{ message.tags }}" style="margin-bottom: 0px;margin-top: 10px;">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
     <input class="login-submit" type="submit" value="Submit">
 </form>
 </div></span>

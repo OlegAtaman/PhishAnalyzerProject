@@ -17,6 +17,13 @@ def scrap_mailbox(boxname, mail_imap_obj):
     found_mail = {}
     mail_imap_obj.select(boxname)
 
+    status, folders = mail_imap_obj.list()
+    print("FOLDERS:")
+    for f in folders:
+        print(f)
+
+    print(mail_imap_obj)
+
     status, messages = mail_imap_obj.search(None, 'UNSEEN')
 
     email_ids = messages[0].split()
@@ -36,8 +43,6 @@ def scrap_mailbox(boxname, mail_imap_obj):
                     part.decode(encoding or 'utf-8') if isinstance(part, bytes) else part
                     for part, encoding in subject
                 )
-
-
 
                 from_ = msg["from"]
                 print('GOT EMAIL:')
@@ -59,6 +64,6 @@ def scrap_mailbox(boxname, mail_imap_obj):
                         save=True
                     )
 
-                found_mail.update({new_obj.id:msg})
+                    found_mail.update({new_obj.id:msg})
 
     return found_mail
