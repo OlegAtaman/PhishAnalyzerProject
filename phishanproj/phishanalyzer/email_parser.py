@@ -6,6 +6,8 @@ from phishanalyzer.models import Attachment, Link
 from phishanalyzer.utils import get_file_hash, get_string_hash, get_links_from_email
 from email import message_from_bytes
 
+from phishanalyzer.security_check import is_orphan_file
+
 def analyze_email(email_file, email_obj):
     with email_file.open('rb') as raw_email:
         new_mail = raw_email.read()

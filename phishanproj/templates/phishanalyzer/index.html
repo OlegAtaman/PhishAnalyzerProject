@@ -27,6 +27,13 @@
         <input id="upload" class="index-input-field" type="file" name="email">
         <input class="index-input-button" type="submit" value="Submit">
     </form>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="message {{ message.tags }}" style="margin-bottom: 5px;">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
     <p class="index-hint">...or just forward email to test.phish.analyzer@gmail.com</p>
     <p class="index-star-hint">*Consider that analysis uploaded in unauthorized mode are available to anyone with respective url. Make sure not to leak any sensitive information or login to your account</p>
 </div>

@@ -4,11 +4,19 @@ from django.http import HttpResponse
 from phishanalyzer.utils import generate_string, get_file_hash
 from phishanalyzer.models import Email, Link, Attachment
 from phishanalyzer.email_parser import analyze_email
-from phishanalyzer.tasks import analyze_email_vt, checkmailbox
+from phishanalyzer.tasks import analyze_email_vt
+from authapp.utils import get_client_ip
+from phishanalyzer.security_check import count_analysis_attempt
+from django.contrib import messages
 
 
 def mainpage(request):
     if request.method == 'POST':
+        user_ip = get_client_ip(request)
+        alowance, exp = count_analysis_attempt(user_ip)
+        if not alowance:
+            messages.error(request, exp)
+            return redirect('mainpage')
         uploaded_file = request.FILES.get('email')
 
         if str(uploaded_file).split('.')[-1] != 'eml':

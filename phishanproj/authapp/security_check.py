@@ -22,13 +22,15 @@ def try_code(code, obj):
 
     return False, "! Incorrect code. Try again."
 
-def count_login_attempt(email):
+def count_login_attempt(email, user_ip):
     attempts = cache.get(f"login_attempts:{email}", 0)
+    ip_attempts = cache.get(f"login_attempts_ip:{user_ip}", 0)
 
-    if attempts > 4:
+    if attempts > 4 or ip_attempts > 9:
         return False, "! Too many failed attempts. Try later."
 
     cache.set(f"login_attempts:{email}", attempts + 1, timeout=300)
+    cache.set(f"login_attempts_ip:{user_ip}", ip_attempts + 1, timeout=300)
     return True, "Success."
 
 def set_zero_attempts(email):

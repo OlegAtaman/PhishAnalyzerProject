@@ -1,3 +1,4 @@
+import os
 import random
 import re
 import smtplib
@@ -5,8 +6,12 @@ import smtplib
 from bs4 import BeautifulSoup
 from hashlib import sha256
 from email.message import EmailMessage
+
+from django.conf import settings
 from phishanalyzer.models import Link, Attachment, Email
 from email.mime.text import MIMEText
+
+from phishanalyzer.security_check import is_orphan_file
 
 LETTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 

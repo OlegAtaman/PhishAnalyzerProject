@@ -8,7 +8,7 @@ from django.http import HttpResponse
 
 from authapp.forms import CustomUserCreationForm
 from authapp.models import CustomUser, ConfirmationEmail
-from authapp.utils import generate_code
+from authapp.utils import generate_code, get_client_ip
 from authapp.postmanager import send_code
 from authapp.security_check import count_login_attempt, set_zero_attempts, try_code
 from phishanalyzer.tasks import delete_confirmation
@@ -19,7 +19,8 @@ def login_user(request):
     if request.method == 'POST':
         email=request.POST['email']
         password=request.POST['password']
-        result, exp = count_login_attempt(email)
+        user_ip = get_client_ip(request)
+        result, exp = count_login_attempt(email, user_ip)
         if result == True:
             user=authenticate(request, email=email, password=password)
         else:
@@ -66,7 +67,6 @@ def register_user(request):
                     'form': form,
                     'provided_email': email
                 })
-
 
         return redirect('mainpage')
 

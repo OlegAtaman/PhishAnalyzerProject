@@ -22,4 +22,8 @@ phishanalyzer.conf.beat_schedule = {
         'task': 'phishanalyzer.tasks.checkmailbox',
         'schedule': crontab(minute='*/5'),
     },
+    'cleanup-media-daily': {
+        'task': 'phishanalyzer.tasks.cleanup_files',
+        'schedule': crontab(hour=3, minute=0),
+    },
 }

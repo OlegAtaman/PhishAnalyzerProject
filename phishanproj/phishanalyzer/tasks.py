@@ -9,6 +9,8 @@ from phishanalyzer.utils import reply_to_email
 from phishanalyzer.email_parser import analyze_email
 from phishanalyzer.imap_parcer import scrap_mailbox
 from authapp.models import ConfirmationEmail
+from django.conf import settings
+from phishanalyzer.security_check import is_orphan_file
 
 
 load_dotenv()
@@ -110,3 +112,26 @@ def checkmailbox():
 @shared_task
 def delete_confirmation(obj_id):
     ConfirmationEmail.objects.filter(id=obj_id).delete()
+
+@shared_task
+def cleanup_files():
+    folders = [
+        os.path.join(settings.MEDIA_ROOT, 'attachments'),
+        os.path.join(settings.MEDIA_ROOT, 'emails'),
+    ]
+
+    for folder in folders:
+        if not os.path.exists(folder):
+            continue
+
+        for filename in os.listdir(folder):
+            file_path = os.path.join(folder, filename)
+
+            if os.path.isfile(file_path):
+                # print(f"Is orphan - {is_orphan_file(file_path)}")
+                if is_orphan_file(file_path):
+                    try:
+                        os.remove(file_path)
+                        print(f"Deleted: {file_path}")
+                    except Exception as e:
+                        print(f"Error deleting {file_path}: {e}")
