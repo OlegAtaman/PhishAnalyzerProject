@@ -1,11 +1,11 @@
-import imaplib, os
+import imaplib, os, vt
 
 from dotenv import load_dotenv
-from celery import shared_task
+from celery import chain, shared_task
 
 from phishanalyzer.models import Email
-from phishanalyzer.virustotal import send_url_vt, send_file_vt, get_url_vt
-from phishanalyzer.utils import reply_to_email
+from phishanalyzer.virustotal import get_file_result_by_hash, get_result_vt, get_url_result_by_hash, send_url_vt, send_file_vt
+from phishanalyzer.utils import parce_inbox_email_data, reply_to_email
 from phishanalyzer.email_parser import analyze_email
 from phishanalyzer.imap_parcer import scrap_mailbox
 from authapp.models import ConfirmationEmail
@@ -17,56 +17,88 @@ load_dotenv()
 
 GMAIL_USERNAME = 'phishanalyzer.dev@gmail.com'
 GMAIL_PASS = os.getenv('GOOGLEE_APP_PASSWORD')
+api_key = os.getenv('VIRUSTOTAL_API_KEY')
+vt_url = 'https://www.virustotal.com/api/v3'
 
+# @shared_task(
+#     bind=True,
+#     autoretry_for=(Exception,),
+#     retry_backoff=True,
+#     retry_jitter=True,
+#     max_retries=5
+# )
 @shared_task
 def analyze_email_vt(email_id):
     email_obj = Email.objects.get(id=email_id)
+    client = vt.Client(api_key)
 
-    for link in email_obj.link_set.all():
-        link.analysis_id = send_url_vt(link.url)
-        link.status = 'AN'
-        link.save()
+    try:
+        for link in email_obj.link_set.all():
+            old_results = get_url_result_by_hash(link.vt_url_id, client)
+            if old_results:
+                link.risk_score = old_results.get('malicious') + old_results.get('suspicious')//2
+                link.status = 'FN'
+                link.save()
+            else:
+                link.analysis_id = send_url_vt(link.url, client)
+                link.status = 'AN'
+                link.save()
 
-    for att in email_obj.attachment_set.all():
-        att.analysis_id = send_file_vt(att.file)
-        att.status = 'AN'
-        att.save()
+        for att in email_obj.attachment_set.all():
+            old_results = get_file_result_by_hash(att.hash_sha256, client)
+            if old_results:
+                att.risk_score = old_results.get('malicious') + old_results.get('suspicious')//2
+                att.status = 'FN'
+                att.file.delete(save=False)
+                att.save()
+            else:
+                att.analysis_id = send_file_vt(att.file, client)
+                att.status = 'AN'
+                att.save()
+    finally:
+        # print('Something went wrong trying to send an analysis')
+        client.close()
 
-    poll_results.delay(email_id)
+    return email_id
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=10, max_retries=5)
 def poll_results(self, email_id):
+    client =  vt.Client(api_key)
     email_obj = Email.objects.get(id=email_id)
     all_done = True
 
-    for link in email_obj.link_set.all():
-        if link.status != 'FN':
-            results = get_url_vt(link.analysis_id)
+    try:
+        for link in email_obj.link_set.all():
+            if link.status != 'FN':
+                results = get_result_vt(link.analysis_id, client)
 
-            if not results:
-                all_done = False
-                continue
+                if not results:
+                    all_done = False
+                    continue
 
-            link.risk_score = results.get('malicious') + results.get('suspicious')//2
-            link.status = 'FN'
-            link.save()
+                link.risk_score = results.get('malicious') + results.get('suspicious')//2
+                link.status = 'FN'
+                link.save()
 
-    for att in email_obj.attachment_set.all():
-        if att.status != 'FN':
-            results = get_url_vt(att.analysis_id)
+        for att in email_obj.attachment_set.all():
+            if att.status != 'FN':
+                results = get_result_vt(att.analysis_id, client)
 
-            if not results:
-                all_done = False
-                continue
+                if not results:
+                    all_done = False
+                    continue
 
-            att.risk_score = results.get('malicious') + results.get('suspicious')//2
-            att.status = 'FN'
-            att.file.delete(save=False)
-            att.save()
+                att.risk_score = results.get('malicious') + results.get('suspicious')//2
+                att.status = 'FN'
+                att.file.delete(save=False)
+                att.save()
+    finally:
+        # print('Something went wrong trying to get analysis result')
+        client.close()
 
     if not all_done:
         raise self.retry()
-    finalize_email.delay(email_id)
+    return email_id
 
 @shared_task
 def finalize_email(email_id):
@@ -82,6 +114,7 @@ def finalize_email(email_id):
     email_obj.status = 'FN'
     email_obj.file.delete(save=False)
     email_obj.save()
+    return email_id
 
 @shared_task
 def checkmailbox():
@@ -100,12 +133,15 @@ def checkmailbox():
 
     for email_id in new_emails_to_analyze.keys():
         email_obj = Email.objects.get(id=email_id)
-
         analyze_email(email_obj.file, email_obj)
-        analyze_email_vt(email_id)
-
-        reply_to_email(new_emails_to_analyze.get(email_id), GMAIL_USERNAME, GMAIL_PASS, email_obj.id)
-
+        mail_data = parce_inbox_email_data(new_emails_to_analyze.get(email_id))
+        chain(
+            analyze_email_vt.s(),
+            poll_results.s(),
+            finalize_email.s(),
+            send_analysis_reply.s(mail_data, GMAIL_USERNAME, GMAIL_PASS)
+            ).delay(email_obj.id)
+        # send_analysis_reply.delay(mail_data, GMAIL_USERNAME, GMAIL_PASS, email_obj.id)
 
     mail.close()
 
@@ -135,3 +171,11 @@ def cleanup_files():
                         print(f"Deleted: {file_path}")
                     except Exception as e:
                         print(f"Error deleting {file_path}: {e}")
+
+@shared_task(
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    max_retries=5
+)
+def send_analysis_reply(analisys_id, original_email, my_email, my_password):
+    reply_to_email(original_email, my_email, my_password, analisys_id)

@@ -9,9 +9,10 @@ from django.http import HttpResponse
 from authapp.forms import CustomUserCreationForm
 from authapp.models import CustomUser, ConfirmationEmail
 from authapp.utils import generate_code, get_client_ip
-from authapp.postmanager import send_code
+from authapp.tasks import send_code
 from authapp.security_check import count_login_attempt, set_zero_attempts, try_code
 from phishanalyzer.tasks import delete_confirmation
+from django.core.paginator import Paginator
 
 
 def login_user(request):
@@ -76,6 +77,10 @@ def register_user(request):
 
 def enter_email(request):
     if request.method == 'POST':
+        existent_user = CustomUser.objects.filter(email=request.POST.get('email')).first()
+        if existent_user:
+            messages.error(request, "! This email is already taken")
+            return redirect('enter_email')
         try:
             random_code = generate_code()
             mail_to_confirm = ConfirmationEmail(email=request.POST.get('email'), code=random_code)
@@ -86,7 +91,7 @@ def enter_email(request):
             return redirect('enter_email')
         url = reverse('confirm_email')
         mini_url = url + '?email=' + request.POST['email']
-        send_code(mail_to_confirm.email,
+        send_code.delay(mail_to_confirm.email,
                   mail_to_confirm.code,
                   'phishanalyzer.dev@gmail.com',
                   os.getenv('GOOGLEE_APP_PASSWORD'),
@@ -139,8 +144,19 @@ def profile_user(request, name):
         return HttpResponse('Користувача не знайдено')
     
     if request.user != user[0]:
-        return HttpResponse('Цей профіль приватний')
+        return HttpResponse('Користувача не знайдено')
     
     user_scans = user[0].up_emails.all()
 
-    return render(request, 'authapp/profile.html', {'emails':user_scans})
+    paginator = Paginator(user_scans, 10)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(
+        request,
+        'authapp/profile.html',
+        {
+            'page_obj': page_obj
+        }
+    )

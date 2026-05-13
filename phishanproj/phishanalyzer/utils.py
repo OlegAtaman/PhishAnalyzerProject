@@ -1,3 +1,4 @@
+import base64
 import os
 import random
 import re
@@ -8,12 +9,16 @@ from hashlib import sha256
 from email.message import EmailMessage
 
 from django.conf import settings
+from dotenv import load_dotenv
 from phishanalyzer.models import Link, Attachment, Email
 from email.mime.text import MIMEText
 
 from phishanalyzer.security_check import is_orphan_file
 
+load_dotenv()
+
 LETTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+WEBSITE_URL = f'http://127.0.0.1:8000/analysis/'
 
 # Generates a string of letters
 def generate_string(length):
@@ -38,6 +43,12 @@ def get_string_hash(string):
     sha256_hash.update(encoded_string)
 
     return sha256_hash.hexdigest()
+
+def get_url_id(url):
+    url_id = base64.urlsafe_b64encode(
+        url.encode()
+    ).decode().strip("=")
+    return url_id
 
 def is_valid_url(url):
     if url[-1] == '.':
@@ -93,18 +104,19 @@ def reply_to_email(original_email, my_email, my_password, analisys_id):
     if f_links:
         found_links_block = '<h3>Found links:</h3>'
         for link in f_links:
-            found_links_block += f'<p>{link.hash_sha256}</p>'
+            found_links_block += f'<p>{link.vt_url_id}</p>'
             found_links_block += get_risk_score_line(link.risk_score)
 
     if f_attachments:
         found_attachments_block = '<h3>Found attachments:</h3>'
         for attachment in f_attachments:
-            found_attachments_block += f'<p>{attachment.hash}</p>'
+            found_attachments_block += f'<p>{attachment.hash_sha256}</p>'
             found_attachments_block += get_risk_score_line(attachment.risk_score)
 
     html = f'''
 <html><body>
 <h2>Thank you for your submission</h2>
+<p>Link to analysis: <a href="{WEBSITE_URL}{sid}">*click*</a></p>
 <h3>Email analysis result:</h3>
 <p>Analysis sid: {sid}</p>
 {get_risk_score_line(risk_score)}
@@ -128,3 +140,14 @@ def get_risk_score_line(risk_score):
         return f'<p>Risk score: {risk_score} | <a style="color:yellow">Suspicious</a></p>'
     else:
         return f'<p>Risk score: {risk_score} | <a style="color:red">Dangerous</a></p>'
+
+def parce_inbox_email_data(original_email):
+    from_email = original_email["from"]
+    subject = original_email["subject"]
+    message_id = original_email["message-id"]
+    data = {
+        'from':from_email,
+        'subject':subject,
+        'message-id':message_id,
+    }
+    return data

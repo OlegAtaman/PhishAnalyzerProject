@@ -1,3 +1,4 @@
+from email.utils import parseaddr
 import hashlib, email
 
 from email.header import decode_header
@@ -5,6 +6,7 @@ from django.core.files.base import ContentFile
 
 from phishanalyzer.models import Email
 from phishanalyzer.utils import generate_string
+from authapp.models import CustomUser
 
 
 MARKERS = (
@@ -45,6 +47,7 @@ def scrap_mailbox(boxname, mail_imap_obj):
                 )
 
                 from_ = msg["from"]
+                from_user = map_sender_to_user(from_)
                 print('GOT EMAIL:')
                 print(f'SUBJECT: {subject_str}')
                 print(f'FROM: {from_}')
@@ -64,6 +67,15 @@ def scrap_mailbox(boxname, mail_imap_obj):
                         save=True
                     )
 
+                    if from_user:
+                        new_obj.author.add(from_user)
+
                     found_mail.update({new_obj.id:msg})
 
     return found_mail
+
+def map_sender_to_user(from_email):
+    name, email_addr = parseaddr(from_email)
+
+    user_obj = CustomUser.objects.filter(email=email_addr).first()
+    return user_obj

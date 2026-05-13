@@ -1,10 +1,11 @@
+from celery import chain
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 
 from phishanalyzer.utils import generate_string, get_file_hash
 from phishanalyzer.models import Email, Link, Attachment
 from phishanalyzer.email_parser import analyze_email
-from phishanalyzer.tasks import analyze_email_vt
+from phishanalyzer.tasks import analyze_email_vt, finalize_email, poll_results
 from authapp.utils import get_client_ip
 from phishanalyzer.security_check import count_analysis_attempt
 from django.contrib import messages
@@ -34,7 +35,7 @@ def mainpage(request):
 
             analyze_email(uploaded_file, new_email_obj)
 
-            analyze_email_vt.delay(new_email_obj.id)
+            chain(analyze_email_vt.s(), poll_results.s(), finalize_email.s(),).delay(new_email_obj.id)
 
         return redirect('detailedpage', new_email_obj.analys_sid)
     
@@ -49,7 +50,10 @@ def detailpage(request, analys_sid):
         'risk_score':email_obj.risk_score,
         'hash':email_obj.hash_sha256,
         'urls':Link.objects.filter(email=email_obj),
-        'attachments':Attachment.objects.filter(email=email_obj)
+        'attachments':Attachment.objects.filter(email=email_obj),
+        'from':email_obj.email_from,
+        'to':email_obj.email_to,
+        'subj':email_obj.email_subject
     }
     # checkmailbox.delay()
     return render(request, 'phishanalyzer/detailpage.html', context)
@@ -62,3 +66,17 @@ def searchpage(request):
         return redirect('detailedpage', request.GET.get('sid'))
 
     return render(request, 'phishanalyzer/search.html')
+
+def deletepage(request, analysis_sid):
+    if request.method != 'POST':
+        return HttpResponseForbidden("The page can ot be reached")
+    
+    analysis_obj = Email.objects.filter(analys_sid=analysis_sid).first()
+    if not analysis_obj:
+        return HttpResponseForbidden("The page can ot be reached")
+    
+    if request.user in analysis_obj.author.all() and request.user.is_authenticated:
+        analysis_obj.delete()
+        return redirect('profile_user', request.user.username)
+        
+    return HttpResponseForbidden("The page can ot be reached")

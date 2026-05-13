@@ -11,16 +11,28 @@ load_dotenv()
 api_key = os.getenv('VIRUSTOTAL_API_KEY')
 vt_url = 'https://www.virustotal.com/api/v3'
 
-def send_url_vt(link):
-    client = vt.Client(api_key)
+def get_file_result_by_hash(hash, client):
+    try:
+        analysis = client.get_object("/files/{}", hash)
+    except:
+        return None
+    stats = analysis.last_analysis_stats
+    return stats
+
+def get_url_result_by_hash(hash, client):
+    try:
+        analysis = client.get_object("/urls/{}", hash)
+    except:
+        return None
+    stats = analysis.last_analysis_stats
+    return stats
+
+
+def send_url_vt(link, client):
     analysis = client.scan_url(link)
-
-    client.close()
-
     return analysis.id
 
-def send_file_vt(file):
-    client = vt.Client(api_key)
+def send_file_vt(file, client):
     file.open('rb')
     bytes = file.read()
 
@@ -34,34 +46,13 @@ def send_file_vt(file):
 
     os.remove(tmp_path)
 
-    client.close()
-
     return analysis.id
 
-def get_url_vt(analysis_id):
-    client = vt.Client(api_key)
-
+def get_result_vt(analysis_id, client):
     while True:
         analysis = client.get_object("/analyses/{}", analysis_id)
         if analysis.status == "completed":
             analysis_results = analysis.stats
             break
         time.sleep(5)
-
-    client.close()
-
-    return analysis_results
-
-def get_file_vt(analysis_id):
-    client = vt.Client(api_key)
-
-    while True:
-        analysis = client.get_object("/analyses/{}", analysis_id)
-        if analysis.status == "completed":
-            analysis_results = analysis.stats
-            break
-        time.sleep(5)
-
-    client.close()
-
     return analysis_results

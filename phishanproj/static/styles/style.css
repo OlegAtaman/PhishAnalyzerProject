@@ -20,6 +20,7 @@ body {
     overflow-x: hidden;
     background-color: black;
     color: white;
+    overflow-wrap: break-word;
 }
 
 body::before {
@@ -287,6 +288,7 @@ nav {
     padding-top: 5px;
     padding-bottom: 5px;
     padding-left: 30px;
+    padding-right: 20px;
     text-align: left;
     margin-bottom: 15px;
 }
@@ -364,4 +366,193 @@ nav {
 
 .profile-historyblock > a:hover {
     background-color: rgba(255,255,255,0.2);
+}
+
+.small-block-link-wrapper {
+    border-radius: 20px;
+    display: block;
+    text-decoration: none;
+    color: white;
+}
+
+.small-block-link-wrapper:hover {
+    background-color: rgba(255,255,255,0.2);
+}
+
+/* Контейнер пагінації */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+
+    margin-top: 25px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+/* Кнопки сторінок */
+.page-btn {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+
+    min-width: 38px;
+    height: 38px;
+    padding: 0 10px;
+
+    border-radius: 12px;
+    text-decoration: none;
+
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+
+    background-color: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(6px);
+
+    cursor: pointer;
+}
+
+/* hover ефект */
+.page-btn:hover, .page-btn-active {
+    background-color: rgba(255, 255, 255, 0.18);
+}
+
+.copy-decorator {
+    height: 16px;
+    margin-left: 5px;
+    margin-bottom: 2px;
+}
+
+.copy-popup {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    background-color: rgba(30, 30, 30, 0.9);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0;
+    transition:
+        opacity 1s ease,
+        transform 0.25s ease;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.copy-popup.show {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+}
+
+.spoiler-text {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* min-width: 120px; */
+    height: 20px;
+    padding: 0 12px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    color: white;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    vertical-align: middle;
+    line-height: 20px;
+    margin-bottom: 4px;
+}
+
+.spoiler-text::before {
+    content: "*click*";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(120,120,120);
+    color: white;
+    transition: opacity 0.2s ease;
+}
+
+.spoiler-text.revealed::before {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.delete-email-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 22px;
+    height: 22px;
+    z-index: 100;
+    cursor: pointer;
+    opacity: 0.7;
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+}
+
+.delete-email-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.delete-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.delete-popup {
+    background-color: rgba(40,40,40,0.98);
+    color: white;
+    padding: 30px;
+    border-radius: 20px;
+    min-width: 350px;
+    text-align: center;
+}
+
+.delete-popup-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.popup-btn {
+    border: none;
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    color: white;
+    background-color: rgba(255,255,255,0.15);
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.popup-btn:hover {
+    background-color: rgba(255,255,255,0.25);
+    transform: scale(1.05);
+}
+
+.confirm-btn:hover {
+    background-color: rgba(255,0,0,0.4);
+}
+
+@media (max-width: 425px) {
+
 }

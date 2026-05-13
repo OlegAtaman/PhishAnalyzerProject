@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load tags %}
+{% load static %}
 {% block 'title' %}
 <title>Registration</title>
 {% endblock %}
@@ -13,22 +15,108 @@
 <h2>Welcome back, {{ request.user.username }}</h2>
 <h1 class="guide-title">Your analysis history</h1>
 <div class='profile-historyblock'>
-{% for email in emails %}
-<a href="{% url 'detailedpage' email.analys_sid %}"><div class="profile-emailblock">
-{% if email.status == 'UP' %}
-<div class="profile-decoration"></div>
-{% elif email.risk_score == 0 %}
-<div class="profile-decoration" style="background-color: green;"></div>
-{% elif email.risk_score < 5 %}
-<div class="profile-decoration" style="background-color: yellow;"></div>
-{% else %}
-<div class="profile-decoration" style="background-color: red;"></div>
-{% endif %}
-<p>Time: {{ email.analys_sid }}</p>
-<p>Analysis id: {{ email.analys_sid }}</p>
-<p>Risk score: {{ email.risk_score }}</p>
-</div></a>
+{% for email in page_obj %}
+<a href="{% url 'detailedpage' email.analys_sid %}">
+    <div class="profile-emailblock">
+        <img
+            class="delete-email-btn"
+            data-analysis-id="{{ email.analys_sid }}"
+            src="{% static 'images/bin.png' %}"
+        >
+        {% if email.status == 'UP' %}
+            <div class="profile-decoration"></div>
+        {% elif email.risk_score == 0 %}
+            <div class="profile-decoration" style="background-color: green;"></div>
+        {% elif email.risk_score < 5 %}
+            <div class="profile-decoration" style="background-color: yellow;"></div>
+        {% else %}
+            <div class="profile-decoration" style="background-color: red;"></div>
+        {% endif %}
+        <p>Time: {{ email.uploaded_at|time_since }}</p>
+        <p>Analysis id: {{ email.analys_sid }}</p>
+        <p>Risk score: {{ email.risk_score }}</p>
+    </div>
+</a>
+
 {% endfor %}
 </div>
 </div>
+<div class="pagination">
+    {% if page_obj.paginator.num_pages > 1 %}
+        {% with num_pages=page_obj.paginator.num_pages current=page_obj.number %}
+        {% if num_pages <= 5 %}
+            {% for num in page_obj.paginator.page_range %}
+                {% if num == current %}
+                    <span class="page-btn page-btn-active">{{ num }}</span>
+                {% else %}
+                    <a class="page-btn" href="?page={{ num }}">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+        {% else %}
+
+            {# ===== START ===== #}
+            {% if current <= 3 %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num <= 4 %}
+                        {% if num == current %}
+                            <span class="page-btn page-btn-active">{{ num }}</span>
+                        {% else %}
+                            <a class="page-btn" href="?page={{ num }}">{{ num }}</a>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+
+                <span class="pagination-dots">...</span>
+                <a class="page-btn" href="?page={{ num_pages }}">{{ num_pages }}</a>
+
+            {# ===== END ===== #}
+            {% elif current >= num_pages|add:'-2' %}
+
+                <a class="page-btn" href="?page=1">1</a>
+                <span class="pagination-dots">...</span>
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num > num_pages|add:'-4' %}
+
+                        {% if num == current %}
+                            <span class="page-btn page-btn-active">{{ num }}</span>
+                        {% else %}
+                            <a class="page-btn" href="?page={{ num }}">{{ num }}</a>
+                        {% endif %}
+
+                    {% endif %}
+                {% endfor %}
+
+            {# ===== MIDDLE ===== #}
+            {% else %}
+
+                <a class="page-btn" href="?page=1">1</a>
+                <span class="pagination-dots">...</span>
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num >= current|add:'-1' and num <= current|add:'1' %}
+
+                        {% if num == current %}
+                            <span class="page-btn page-btn-active">{{ num }}</span>
+                        {% else %}
+                            <a class="page-btn" href="?page={{ num }}">{{ num }}</a>
+                        {% endif %}
+
+                    {% endif %}
+                {% endfor %}
+
+                <span class="pagination-dots">...</span>
+                <a class="page-btn" href="?page={{ num_pages }}">{{ num_pages }}</a>
+
+            {% endif %}
+
+        {% endif %}
+
+        {% endwith %}
+
+    {% endif %}
+</div>
+<script src="{% static 'scripts/logic/profile_logic.js' %}"></script>
 {% endblock %}
