@@ -62,10 +62,18 @@ def guidepage(request):
     return render(request, 'phishanalyzer/guide.html')
 
 def searchpage(request):
-    if request.GET.get('sid'):
-        return redirect('detailedpage', request.GET.get('sid'))
+    if not request.GET.get('sid'):
+        return render(request, 'phishanalyzer/search.html')
 
-    return render(request, 'phishanalyzer/search.html')
+    email_obj = Email.objects.filter(analys_sid=request.GET.get('sid')).first()
+
+    if not email_obj:
+        messages.error(request, 'Analysis does not exist or you do not have access to it')
+        return redirect('searchpage')
+    if email_obj.author.all() and email_obj.author.all().first() != request.user:
+        messages.error(request, 'Analysis does not exist or you do not have access to it')
+        return redirect('searchpage')
+    return redirect('detailedpage', request.GET.get('sid'))
 
 def deletepage(request, analysis_sid):
     if request.method != 'POST':

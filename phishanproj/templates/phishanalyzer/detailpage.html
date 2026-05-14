@@ -19,7 +19,7 @@
         </span>
     </nav>
     <div class="detail-content-box">
-    <h1>Analysis result</h1>
+    <h1 class="detail-header">Analysis result</h1>
     {% if status == 'UP' %}
     <div class="detail-char-box">
     <p id="status-bar"><b>Status:</b> pending...</p>
@@ -42,7 +42,7 @@
     <p id="score-bar"><b>Risk score:</b> <a style="color:red">{{ risk_score }} | dangerous</a></p>
     {% endif %}</div>
     {% endif %}
-    <h2>Email information:</h2>
+    <h2 class="detail-header">Email information:</h2>
     <div class="detail-char-box">
         <p>
             From:
@@ -57,7 +57,7 @@
             <span class="spoiler-text">{{ subj }}</span>
         </p>
     </div>
-    <h2>Links in email:</h2>
+    <h2 class="detail-header">Links in email:</h2>
         {% if urls %}
         {% for link in urls %}
             <a class="small-block-link-wrapper" href="https://www.virustotal.com/gui/url/{{ link.vt_url_id }}" target="_blank"><div class="detail-link-box">
@@ -82,7 +82,7 @@
         {% else %}
             <p class="detail-hint">There is no found links in this email.</p>
         {% endif %}
-    <h2>Attachments in email:</h2>
+    <h2 class="detail-header">Attachments in email:</h2>
         {% if attachments %}
         {% for attachment in attachments %}
         <a class="small-block-link-wrapper" href="https://www.virustotal.com/gui/file/{{ attachment.hash_sha256 }}" target="_blank">

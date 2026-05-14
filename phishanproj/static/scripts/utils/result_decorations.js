@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const text = document
             .getElementById("analysis-id")
             .innerText;
-        navigator.clipboard.writeText(text)
+        copyText(text)
             .then(() => {
                 const popup = document.createElement("div");
                 popup.className = "copy-popup";
@@ -36,4 +36,48 @@ document.addEventListener('DOMContentLoaded', function () {
             spoiler.classList.add("revealed");
         });
     });
+    
+    function copyText(text) {
+
+        if (navigator.clipboard && window.isSecureContext) {
+
+            return navigator.clipboard.writeText(text);
+
+        } else {
+
+            return new Promise((resolve, reject) => {
+
+                const textArea = document.createElement("textarea");
+
+                textArea.value = text;
+
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+
+                document.body.appendChild(textArea);
+
+                textArea.focus();
+                textArea.select();
+
+                try {
+
+                    document.execCommand("copy");
+
+                    textArea.remove();
+
+                    resolve();
+
+                } catch (err) {
+
+                    textArea.remove();
+
+                    reject(err);
+
+                }
+
+            });
+
+        }
+
+    }
 });
